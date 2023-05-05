@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "c37d8783-c417-43a7-b4a3-1a83ddc51779",
+		"name": "DigitalSign",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://digitalsignpdf.azurewebsites.net/api/Sign",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "PdfFile",
+							"type": "file",
+							"src": "/C:/pdfdocuments/sample.pdf"
+						},
+						{
+							"key": "PfxFile",
+							"type": "file",
+							"src": "/C:/pdfdocuments/sankit.pfx"
+						},
+						{
+							"key": "Password",
+							"value": "sankit",
+							"type": "default"
+						},
+						{
+							"key": "location",
+							"value": "ahmedabad",
+							"type": "default"
+						},
+						{
+							"key": "reason",
+							"value": "Testing",
+							"type": "default"
+						},
+						{
+							"key": "PageX",
+							"value": "20",
+							"type": "default"
+						},
+						{
+							"key": "PageY",
+							"value": "10",
+							"type": "default"
+						},
+						{
+							"key": "Height",
+							"value": "170",
+							"type": "default"
+						},
+						{
+							"key": "Width",
+							"value": "60",
+							"type": "default"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://digitalsignpdf.azurewebsites.net/api/Sign",
+					"protocol": "https",
+					"host": [
+						"digitalsignpdf",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"Sign"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
