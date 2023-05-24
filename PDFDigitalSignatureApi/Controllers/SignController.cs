@@ -4,6 +4,7 @@ using iTextSharp.text.pdf.security;
 using System.Diagnostics;
 using PDFDigitalSignatureApi.Model;
 using PDFDigitalSignatureApi.Repository;
+using Microsoft.Extensions.Configuration;
 
 
 namespace PDFDigitalSignatureApi.Controllers
@@ -14,16 +15,24 @@ namespace PDFDigitalSignatureApi.Controllers
     {
 
         private readonly IUserInfoRepository _userInfoRepository;
-
-        public SignController(IUserInfoRepository userInfoRepository)
+        private readonly IConfiguration _configuration;
+        public SignController(IUserInfoRepository userInfoRepository, IConfiguration configuration)
         {
             _userInfoRepository = userInfoRepository;
+            _configuration = configuration;
         }
+
         [HttpPost]
         public IActionResult Post([FromForm] Sign data)
         {
+            string staticPath = _configuration.GetValue<string>("FilePathSetting:LogFile");
             try
             {
+                using (StreamWriter sw = new StreamWriter(staticPath, true))
+                {
+                    sw.WriteLine("Sign Post Started" + "\n ");
+                }
+
                 var GetPfx = _userInfoRepository.GetSign(data.UserId);
                 byte[] bytes = System.Convert.FromBase64String(GetPfx.PfxFile);
                 Stream stream = new MemoryStream(bytes);
@@ -56,7 +65,13 @@ namespace PDFDigitalSignatureApi.Controllers
                 var st = new StackTrace(ex, true);
                 var frame = st.GetFrame(0);
                 var line = frame.GetFileLineNumber();
-                return StatusCode(500, "Internal server errors:" + ex.ToString() + " sdsd " + Directory.GetCurrentDirectory());
+
+                using (StreamWriter sw = new StreamWriter(staticPath, true))
+                {
+                    sw.WriteLine("Sign Post Error: " + ex.InnerException + " " + ex.Message + "\n ");
+                }
+
+                return StatusCode(500, "Internal server errors:" + ex.ToString() + " " + Directory.GetCurrentDirectory());
             }
         }
 
@@ -90,7 +105,7 @@ namespace PDFDigitalSignatureApi.Controllers
 
             // reader and stamper
             var streampdf = pdffile.OpenReadStream();
-            
+
 
             PdfReader reader = new PdfReader(streampdf);
             using (FileStream fout = new FileStream(destinationPath, FileMode.Create, FileAccess.ReadWrite))
@@ -113,8 +128,14 @@ namespace PDFDigitalSignatureApi.Controllers
         [HttpPost("AddPfxFile")]
         public dynamic AddPfxFile([FromForm] UserInfoDto userInfo)
         {
+            string staticPath = _configuration.GetValue<string>("FilePathSetting:LogFile");
+            
             try
             {
+                using (StreamWriter sw = new StreamWriter(staticPath, true))
+                {
+                    sw.WriteLine("AddPfxFile Started" + "\n ");
+                }
                 //Byte[] bytes = System.IO.File.ReadAllBytes(userInfo.PfxFile);
 
                 var streampfx = userInfo.PfxFile.OpenReadStream();
@@ -132,6 +153,10 @@ namespace PDFDigitalSignatureApi.Controllers
             }
             catch (Exception ex)
             {
+                using (StreamWriter sw = new StreamWriter(staticPath, true))
+                {
+                    sw.WriteLine("AddPfxFile Error: " + ex.InnerException + " " + ex.Message + "\n ");
+                }
                 return ex;
             }
         }
