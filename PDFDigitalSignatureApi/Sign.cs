@@ -15,5 +15,7 @@ namespace PDFDigitalSignatureApi
         public int PageY { get; set; } = 10;
         public int Height { get; set; } = 170;
         public int Width { get; set; } = 60;
+
+        public int PageNo { get; set; } = 1;
     }
 }

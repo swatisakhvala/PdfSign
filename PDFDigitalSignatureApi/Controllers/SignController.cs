@@ -5,7 +5,7 @@ using System.Diagnostics;
 using PDFDigitalSignatureApi.Model;
 using PDFDigitalSignatureApi.Repository;
 using Microsoft.Extensions.Configuration;
-
+using iTextSharp.text;
 
 namespace PDFDigitalSignatureApi.Controllers
 {
@@ -108,6 +108,15 @@ namespace PDFDigitalSignatureApi.Controllers
 
 
             PdfReader reader = new PdfReader(streampdf);
+
+            float width = data.Width;  // Width of the rectangle in points
+            float height = data.Height;  // Height of the rectangle in points
+
+            // Step 2: Calculate the coordinates of the top-left corner
+            float leftX = reader.GetPageSize(1).GetLeft(data.PageX);  // X-coordinate of the left edge of the page with a margin of 36 points
+            float topY = reader.GetPageSize(1).GetTop(data.PageY);  // Y-coordinate of the top edge of the page with a margin of 36 points
+
+
             using (FileStream fout = new FileStream(destinationPath, FileMode.Create, FileAccess.ReadWrite))
             {
                 PdfStamper stamper = PdfStamper.CreateSignature(reader, fout, '\0');
@@ -116,7 +125,14 @@ namespace PDFDigitalSignatureApi.Controllers
                 //appearance.Image = new iTextSharp.text.pdf.PdfImage();
                 appearance.Reason = reason;
                 appearance.Location = location;
-                appearance.SetVisibleSignature(new iTextSharp.text.Rectangle(data.PageX, data.PageY, data.Height, data.Width), reader.NumberOfPages, "signature");
+
+                BaseFont baseFont = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                float fontSize = 9; // Set the desired font size
+
+                Font font = new Font(baseFont, fontSize);
+
+                appearance.Layer2Font = font;
+                appearance.SetVisibleSignature(new iTextSharp.text.Rectangle(leftX, topY, leftX + width, topY - height), data.PageNo, "signature");
                 // digital signature
                 IExternalSignature es = new PrivateKeySignature(pk, DigestAlgorithms.SHA256);
                 MakeSignature.SignDetached(appearance, es, new Org.BouncyCastle.X509.X509Certificate[] { pk12.GetCertificate(alias).Certificate }, null, null, null, 0, CryptoStandard.CMS);
